@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Indian Cyber Law Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+      }
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://aistudiocdn.com/@google/genai@^1.19.0"
+        }
+      }
+    </script>
+    <style>
+      /* Simple scrollbar styling for a better look */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5);
+        border-radius: 20px;
+        border: transparent;
+      }
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <div id="app-container" class="flex flex-col h-screen font-sans text-gray-900 dark:text-gray-100">
+      
+      <!-- Header -->
+      <header class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-10">
+        <div class="flex items-center space-x-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <h1 class="text-xl font-bold text-gray-800 dark:text-white">Indian Cyber Law Chatbot</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button id="bookmark-panel-toggle" class="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900" aria-label="View bookmarks">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.5 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+            </svg>
+            <span id="bookmark-count" class="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-white text-xs hidden" style="transform: translate(25%, -25%)">0</span>
+          </button>
+          <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900" aria-label="Switch theme">
+            <!-- Moon Icon -->
+            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 hidden">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+            </svg>
+            <!-- Sun Icon -->
+            <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 hidden">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-6.364-.386 1.591-1.591M3 12h2.25m.386-6.364 1.591 1.591" />
+            </svg>
+          </button>
+        </div>
+      </header>
+      
+      <!-- Main Content -->
+      <main class="flex-1 flex overflow-hidden">
+        <div class="flex-1 flex flex-col">
+          <!-- Chat Window -->
+          <div id="chat-window" class="flex-1 flex flex-col p-4 overflow-y-auto">
+             <div id="message-container" class="flex-1 space-y-4"></div>
+             <!-- Typing indicator placeholder -->
+             <div id="typing-indicator" class="hidden"></div>
+          </div>
+          <!-- Chat Input -->
+          <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+            <form id="chat-form" class="flex items-center p-2 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+              <button id="voice-input-btn" type="button" class="flex-shrink-0 p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" aria-label="Use microphone">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m12 0v-1.5a6 6 0 0 0-12 0v1.5m12 0v-1.5a6 6 0 0 0-12 0v1.5m6 3.75a.75.75 0 0 1-.75-.75V8.25a.75.75 0 0 1 1.5 0v5.25a.75.75 0 0 1-.75-.75Z"></path>
+                </svg>
+              </button>
+              <input id="chat-input" type="text" placeholder="Ask about Indian Cyber Law..." class="flex-1 mx-2 p-2 bg-transparent focus:outline-none disabled:opacity-50" autocomplete="off" autofocus>
+              <button id="chat-submit" type="submit" class="flex-shrink-0 p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 dark:disabled:bg-blue-800 disabled:cursor-not-allowed transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" aria-label="Send message">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Bookmark Panel -->
+        <div id="bookmark-panel" class="fixed inset-y-0 right-0 z-20 w-full max-w-sm bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out">
+            <div class="flex flex-col h-full">
+              <header class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold">Bookmarked Answers</h2>
+                <button id="bookmark-panel-close" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600" aria-label="Close bookmarks panel">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </header>
+              <div id="bookmark-list" class="flex-1 p-4 overflow-y-auto">
+                <!-- Bookmarked items will be injected here -->
+              </div>
+            </div>
+        </div>
+      </main>
+
+    </div>
+    <script type="module" src="/index.js"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

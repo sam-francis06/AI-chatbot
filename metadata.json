@@ -1,0 +1,7 @@
+{
+  "name": "Indian Cyber Law Chatbot",
+  "description": "An AI-powered chatbot that provides awareness and guidance on Indian cyber laws, enabling users to easily understand legal rights, responsibilities, and remedies related to cybercrimes in India.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
